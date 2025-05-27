@@ -50,7 +50,7 @@ if __name__ == "__main__":
         use_noise_augment=False,
         eval_split_size=10,
         print_step=25,
-        print_eval=False,
+        print_eval=True,
         mixed_precision=False,
         lr_gen=1e-4,
         lr_disc=1e-4,
