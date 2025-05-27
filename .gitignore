@@ -3,7 +3,6 @@ hub/
 *.pth
 __pycache__/
 checkpoints/
-datasets/
 large-datasets/
 wandb/
 *.ipynb
@@ -16,3 +15,4 @@ dataset/
 datasets-*/
 cuda/
 .env
+*_latents/
