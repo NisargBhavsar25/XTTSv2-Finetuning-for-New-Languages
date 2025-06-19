@@ -16,3 +16,4 @@ datasets-*/
 cuda/
 .env
 *_latents/
+dataset_cache

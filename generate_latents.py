@@ -15,7 +15,7 @@ from TTS.tts.layers.xtts.trainer.gpt_trainer import GPTArgs, GPTTrainerConfig, X
 from TTS.tts.models.xtts import load_audio
 
 from models.gpt_decode import GPTDecode
-from datasets.dataset_xtts import GPTXTTSDataset
+from datasets_.dataset_xtts import GPTXTTSDataset
 
 class GPTDecoder:
     def __init__(self, config, config_dataset):
