@@ -8,10 +8,10 @@ from TTS.tts.models.xtts import Xtts
 
 # Device configuration
 device = "cuda:0" if torch.cuda.is_available() else "cpu"
-timestamp = "May-23-2025_01+20PM-8e59ec3"
+# timestamp = "May-23-2025_01+20PM-8e59ec3"
 # Model paths
-xtts_checkpoint = f"checkpoints/GPT_XTTS_FT-{timestamp}/checkpoint_5000.pth"
-xtts_config = f"checkpoints/GPT_XTTS_FT-{timestamp}/config.json"
+xtts_checkpoint = f"checkpoints/GPT_XTTS_FT-May-29-2025_12+48PM-2410589/checkpoint_143000.pth"
+xtts_config = f"checkpoints/GPT_XTTS_FT-May-29-2025_12+48PM-2410589/config.json"
 xtts_vocab = "checkpoints/XTTS_v2.0_original_model_files/vocab.json"
 
 # Load model
@@ -24,8 +24,8 @@ model.to(device)
 print("Model loaded successfully!")
 
 # Get voice conditioning from reference audio
-speaker_audio_file = "reference.wav"
-language = "gj"  # Gujarati language code
+speaker_audio_file = "reference_as_2.wav"
+language = "as"  # Gujarati language code
 
 gpt_cond_latent, speaker_embedding = model.get_conditioning_latents(
     audio_path=speaker_audio_file,
@@ -40,9 +40,7 @@ gpt_cond_latent, speaker_embedding = model.get_conditioning_latents(
 # For longer texts, split into sentences
 # tts_texts = sent_tokenize(tts_text)
 tts_texts = [
-    "પોતાનાં બાળકોને કયા પ્રકારનું શિક્ષણ આપવું તે પસંદ કરવાનો પ્રથમ અધિકાર માબાપોને રહેશે.",
-    "કોમના સાંસ્કૃતિક જીવનમાં છૂટથી ભાગ લેવાનો, કલાઓનો આનંદ માણવાનો અને વૈજ્ઞાનિક પ્રગતિ અને તેના લાભોમાં ભાગીદાર થવાનો દરેક વ્યક્તિને અધિકાર છે.",
-    "માનવવ્યક્તિત્વના સંપૂર્ણ વિકાસ અને માનવહક્કો અને મૂળભૂત સ્વતંત્રતાઓ પ્રત્યેના માનને દઢિભૂત કરવા તરફ શિક્ષણનું લક્ષ રાખવામાં આવશે. બધાં રાષ્ટ્રો, જાતિ અથવા ધાર્મિક સમૂહો વચ્ચે તે સમજ, સહિષ્ણુતા અને મૈત્રી બઢાવશે અને શાંતિની જાળવણી માટેની સંયુકત રાષ્ટ્રોની પ્રવૃત્તિઓને આગળ ધપાવશે."
+    "শাওন-ভাদ মাহ দুটা বর্ষা ঋতু বা বাৰিষা কাল। কিন্তু অসমত বহাগ মাহৰ পৰাই বৰষুণ আৰম্ভ হৈ একেবাৰে আহিন. মাহলৈকে থাকে ৷ ইয়াৰ ভিতৰত জেঠ, আহাৰ, শাওন আৰু ভাদ এই চাৰি মাহত বাৰিষাৰ প্ৰকোপ আটাইতকৈ চৰে"
 ]
 
 # Process each sentence
@@ -65,7 +63,7 @@ for text in tqdm(tts_texts):
 out_wav = torch.cat(wav_chunks, dim=0).unsqueeze(0).cpu()
 
 # Save the audio
-torchaudio.save("output.wav", out_wav, 24000)
+torchaudio.save("output_as_2.wav", out_wav, 24000)
 
 # # For Jupyter Notebook, play the audio
 # from IPython.display import Audio

@@ -5,7 +5,7 @@ import torch
 from trainer import Trainer, TrainerArgs
 from TTS.utils.audio import AudioProcessor
 
-from datasets.preprocess import load_wav_feat_spk_data
+from datasets_.preprocess import load_wav_feat_spk_data
 from configs.gpt_hifigan_config import GPTHifiganConfig
 from models.gpt_gan import GPTGAN
 

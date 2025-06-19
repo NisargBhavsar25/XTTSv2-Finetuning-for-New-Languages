@@ -7,7 +7,6 @@ large-datasets/
 wandb/
 *.ipynb
 *.wav
-test.py
 cps/
 vivoice-datasets/
 output/
@@ -16,3 +15,4 @@ datasets-*/
 cuda/
 .env
 *_latents/
+outputs/
