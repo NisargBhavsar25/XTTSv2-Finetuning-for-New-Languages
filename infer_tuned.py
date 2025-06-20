@@ -10,8 +10,8 @@ from TTS.tts.models.xtts import Xtts
 device = "cuda:0" if torch.cuda.is_available() else "cpu"
 # timestamp = "May-23-2025_01+20PM-8e59ec3"
 # Model paths
-xtts_checkpoint = f"checkpoints/GPT_XTTS_FT-May-29-2025_12+48PM-2410589/checkpoint_143000.pth"
-xtts_config = f"checkpoints/GPT_XTTS_FT-May-29-2025_12+48PM-2410589/config.json"
+xtts_checkpoint = f"checkpoints/intermediate_model/best_model.pth"
+xtts_config = f"checkpoints/intermediate_model/config.json"
 xtts_vocab = "checkpoints/XTTS_v2.0_original_model_files/vocab.json"
 
 # Load model
@@ -40,7 +40,7 @@ gpt_cond_latent, speaker_embedding = model.get_conditioning_latents(
 # For longer texts, split into sentences
 # tts_texts = sent_tokenize(tts_text)
 tts_texts = [
-    "শাওন-ভাদ মাহ দুটা বর্ষা ঋতু বা বাৰিষা কাল। কিন্তু অসমত বহাগ মাহৰ পৰাই বৰষুণ আৰম্ভ হৈ একেবাৰে আহিন. মাহলৈকে থাকে ৷ ইয়াৰ ভিতৰত জেঠ, আহাৰ, শাওন আৰু ভাদ এই চাৰি মাহত বাৰিষাৰ প্ৰকোপ আটাইতকৈ চৰে"
+    "(வணக்கம்)"
 ]
 
 # Process each sentence
@@ -63,7 +63,7 @@ for text in tqdm(tts_texts):
 out_wav = torch.cat(wav_chunks, dim=0).unsqueeze(0).cpu()
 
 # Save the audio
-torchaudio.save("output_as_2.wav", out_wav, 24000)
+torchaudio.save("output_random.wav", out_wav, 24000)
 
 # # For Jupyter Notebook, play the audio
 # from IPython.display import Audio

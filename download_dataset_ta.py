@@ -17,13 +17,13 @@ download_dir = "dataset_cache/"
 # Load the dataset
 ds = load_dataset(
     "ai4bharat/IndicVoices",
-    "malayalam",
+    "tamil",
     token=HF_TOKEN,
     cache_dir=download_dir
 )
 
 # Define the base directory for saving datasets
-base_dir = "datasets-ml"
+base_dir = "datasets-ta"
 wavs_dir = os.path.join(base_dir, "wavs")
 
 # Create directories if they don't exist

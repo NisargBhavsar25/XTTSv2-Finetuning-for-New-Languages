@@ -112,8 +112,9 @@ def train_gpt(metadatas, num_epochs, batch_size, grad_acumm, output_path, max_au
 
     # XTTS transfer learning parameters: You we need to provide the paths of XTTS model checkpoint that you want to do the fine tuning.
     TOKENIZER_FILE = os.path.join(CHECKPOINTS_OUT_PATH, os.path.basename(TOKENIZER_FILE_LINK))  # vocab.json file
-    XTTS_CHECKPOINT = os.path.join(CHECKPOINTS_OUT_PATH, os.path.basename(XTTS_CHECKPOINT_LINK))  # model.pth file
-    XTTS_CONFIG_FILE = os.path.join(CHECKPOINTS_OUT_PATH, os.path.basename(XTTS_CONFIG_LINK))  # config.json file
+    # XTTS_CHECKPOINT = os.path.join(CHECKPOINTS_OUT_PATH, os.path.basename(XTTS_CHECKPOINT_LINK))  # model.pth file
+    XTTS_CHECKPOINT = os.path.join(OUT_PATH, "intermediate_model", "best_model.pth")
+    XTTS_CONFIG_FILE = os.path.join(OUT_PATH, "intermediate_model", "config.json")  # config.json file
 
     # download XTTS v2.0 files if needed
     if not os.path.isfile(TOKENIZER_FILE):
@@ -246,7 +247,7 @@ if __name__ == "__main__":
     print(f"Checkpoint saved in dir: {trainer_out_path}")
 
     # copy the contents of the trainer output path to a new directory
-    final_output_path = os.path.join(args.output_path, "intermediate_model")
+    final_output_path = os.path.join(args.output_path, "final_model")
     os.makedirs(final_output_path, exist_ok=True)
     for item in os.listdir(trainer_out_path):
         src = os.path.join(trainer_out_path, item)
