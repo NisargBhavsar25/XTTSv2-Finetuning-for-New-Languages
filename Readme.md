@@ -19,7 +19,7 @@ This guide provides instructions for finetuning XTTSv2 on a new language, using 
 First, clone the repository and install the necessary dependencies:
 
 ```
-git clone https://github.com/nguyenhoanganh2002/XTTSv2-Finetuning-for-New-Languages.git
+git clone https://github.com/dikshitrishii/XTTSv2-Fine-Tuning-Multilingual.git
 cd XTTSv2-Finetuning-for-New-Languages
 pip install -r requirements.txt --index-url https://download.pytorch.org/whl/cu118
 ```
