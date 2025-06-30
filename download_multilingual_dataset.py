@@ -4,6 +4,8 @@ import os
 import soundfile as sf
 from tqdm.auto import tqdm
 import time
+import shutil
+import gc
 
 # Load environment variables
 dotenv.load_dotenv()
@@ -23,13 +25,52 @@ download_dir = "./dataset_cache"
 os.makedirs(download_dir, exist_ok=True)
 
 # Define the languages we want to process
-languages = ["tamil", "malayalam"]
+languages = ["Tamil","Malayalam","Telugu","Kannada","Hindi","Marathi"]
 target_hours_per_language = 200
 target_seconds_per_language = target_hours_per_language * 3600
 
 # Define the base directory for saving datasets
-base_dir = "./datasets-multilingual"
+base_dir = "./data"
 wavs_dir = os.path.join(base_dir, "wavs")
+
+def get_directory_size(directory):
+    """Calculate the total size of a directory in MB"""
+    total_size = 0
+    try:
+        for dirpath, dirnames, filenames in os.walk(directory):
+            for filename in filenames:
+                filepath = os.path.join(dirpath, filename)
+                if os.path.exists(filepath):
+                    total_size += os.path.getsize(filepath)
+        return total_size / (1024 * 1024)  # Convert to MB
+    except Exception as e:
+        print(f"❌ Error calculating directory size: {e}")
+        return 0
+
+def clear_cache():
+    """Clear the dataset cache to save space"""
+    try:
+        if os.path.exists(download_dir):
+            # Calculate cache size before deletion
+            cache_size = get_directory_size(download_dir)
+            print(f"🗑️ Clearing cache ({cache_size:.2f} MB)...")
+            
+            # Delete the entire cache directory
+            shutil.rmtree(download_dir)
+            
+            # Recreate the cache directory for next use
+            os.makedirs(download_dir, exist_ok=True)
+            
+            print(f"✅ Cache cleared successfully")
+        else:
+            print("ℹ️ No cache directory found to clear")
+            
+        # Force garbage collection to free memory
+        gc.collect()
+        
+    except Exception as e:
+        print(f"❌ Error clearing cache: {str(e)}")
+
 
 # Create directories with absolute path verification
 def create_directories():
@@ -61,8 +102,8 @@ def test_dataset_access():
     try:
         print("🔍 Testing dataset access...")
         test_ds = load_dataset(
-            "ai4bharat/IndicVoices",
-            "tamil",
+            "ai4bharat/indicvoices_r",
+            "Tamil",
             split="train[:1]",  # Load just 1 sample for testing
             token=HF_TOKEN,
             cache_dir=download_dir
@@ -98,7 +139,7 @@ def save_multilingual_dataset(languages, abs_base_dir, abs_wavs_dir, target_seco
             # Load the dataset for this language
             print(f"📥 Loading dataset for {lang}...")
             ds = load_dataset(
-                "ai4bharat/IndicVoices",
+                "ai4bharat/indicvoices_r",
                 lang,
                 token=HF_TOKEN,
                 cache_dir=download_dir
@@ -226,6 +267,8 @@ def save_multilingual_dataset(languages, abs_base_dir, abs_wavs_dir, target_seco
             # Verify files in directory
             actual_files = len([f for f in os.listdir(abs_wavs_dir) if f.startswith(lang)])
             print(f"📁 Verified {actual_files} files in directory for {lang}")
+
+            clear_cache()
             
         except Exception as e:
             print(f"❌ Failed to process {lang}: {str(e)}")
