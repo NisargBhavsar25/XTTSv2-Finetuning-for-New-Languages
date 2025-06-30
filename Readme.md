@@ -30,7 +30,7 @@ The training is a four-step process that involves setting up the pre-trained mod
 
 ### Step 1: Download Pre-trained Checkpoints
 
-Download the official XTTSv2 pre-trained model checkpoints. These will serve as the base for fine-tuning. The checkpoints will be saved in a `checkpoints/` directory[^1].
+Download the official XTTSv2 pre-trained model checkpoints. These will serve as the base for fine-tuning. The checkpoints will be saved in a `checkpoints/` directory.
 
 ```bash
 python -m scripts.preparation.download_checkpoint --output_path checkpoints/
@@ -39,7 +39,7 @@ python -m scripts.preparation.download_checkpoint --output_path checkpoints/
 
 ### Step 2: Download IndicTTS Dataset
 
-Download the IndicTTS dataset, which contains audio and corresponding text for multiple Indic languages. This script will create a directory named `IndicTTS-datasets/` containing the `metadata.csv` file and audio clips[^1].
+Download the IndicTTS dataset, which contains audio and corresponding text for multiple Indic languages. This script will create a directory named `IndicTTS-datasets/` containing the `metadata.csv` file and audio clips.
 
 ```bash
 python -m scripts.preparation.download_IndicTTS_dataset
@@ -68,7 +68,7 @@ python -m scripts.preparation.extend_vocab_config \
 
 ### Step 4: Train the GPT Model
 
-Finally, start the GPT model training process using the prepared dataset and extended vocabulary. The script `train_gpt_xtts_balanced_new.py` is designed to handle multilingual training from a single metadata file[^1].
+Finally, start the GPT model training process using the prepared dataset and extended vocabulary. The script `train_gpt_xtts_balanced_new.py` is designed to handle multilingual training from a single metadata file.
 
 ```bash
 CUDA_VISIBLE_DEVICES=0 python -m scripts.training.train_gpt_xtts_balanced_new \
@@ -111,7 +111,7 @@ While this repository is configured for the IndicTTS dataset, you can train the 
 1. **Organize Audio Files**: Place all your `.wav` audio files in a single directory (e.g., `my_dataset/wavs/`).
 2. **Create `metadata.csv`**: Create a `metadata.csv` file in your dataset's root directory. This file should link the audio files to their transcriptions and specify the language. Use a pipe `|` as the separator.
 
-The `metadata.csv` file must follow this format[^1]:
+The `metadata.csv` file must follow this format:
 
 ```
 audio_file|text|language
@@ -127,6 +127,6 @@ Once your custom dataset is prepared, you can update the paths in the training c
 
 ## Note on Advanced Training (Optional)
 
-This repository includes scripts for fine-tuning other components of the XTTSv2 architecture, such as the D-VAE (`scripts/training/train_dvae_xtts.py`) and the GAN-based vocoder (`scripts/training/train_gan_xtts.py`)[^1].
+This repository includes scripts for fine-tuning other components of the XTTSv2 architecture, such as the D-VAE (`scripts/training/train_dvae_xtts.py`) and the GAN-based vocoder (`scripts/training/train_gan_xtts.py`).
 
-However, **based on experience, these additional training steps are generally not necessary**. Fine-tuning the GPT model as described in [Step 4](#step-4-train-the-gpt-model) is typically sufficient to achieve high-quality results for new languages. Fine-tuning the D-VAE and GAN may not lead to significant improvements and can sometimes degrade performance[^1].
+However, **based on experience, these additional training steps are generally not necessary**. Fine-tuning the GPT model as described in [Step 4](#step-4-train-the-gpt-model) is typically sufficient to achieve high-quality results for new languages. Fine-tuning the D-VAE and GAN may not lead to significant improvements and can sometimes degrade performance.
