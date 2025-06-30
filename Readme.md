@@ -1,191 +1,117 @@
-# XTTSv2 Finetuning Guide for New Languages
+# Indic Polyglot TTS Training with XTTSv2
 
-This guide provides instructions for finetuning XTTSv2 on a multiple languages in order to get polyglot characterstics, using indic languages as example.
-
-[UPDATE] A finetuned model for Vietnamese is now available at [anhnh2002/vnTTS](https://huggingface.co/anhnh2002/vnTTS) on Hugging Face
-
+This guide provides comprehensive instructions for training a multilingual Indic polyglot Text-to-Speech (TTS) model based on the XTTSv2 architecture, utilizing the open-source IndicTTS dataset.
 
 ## Table of Contents
-1. [Installation](#1-installation)
-2. [Data Preparation](#2-data-preparation)
-3. [Pretrained Model Download](#3-pretrained-model-download)
-4. [Vocabulary Extension and Configuration Adjustment](#4-vocabulary-extension-and-configuration-adjustment)
-5. [DVAE Finetuning (Optional)](#5-dvae-finetuning-optional)
-6. [GPT Finetuning](#6-gpt-finetuning)
-7. [Usage Example](#7-usage-example)
 
-## 1. Installation
+* [Installation](#installation)
+* [Training Process](#training-process)
+    * [Step 1: Download Pre-trained Checkpoints](#step-1-download-pre-trained-checkpoints)
+    * [Step 2: Download IndicTTS Dataset](#step-2-download-indic-tts-dataset)
+    * [Step 3: Extend Vocabulary for Each Language](#step-3-extend-vocabulary-for-each-language)
+    * [Step 4: Train the GPT Model](#step-4-train-the-gpt-model)
+* [Using Custom Datasets](#using-custom-datasets)
 
-First, clone the repository and install the necessary dependencies:
 
-```
-git clone [https://github.com/dikshitrishii/XTTSv2-Fine-Tuning-Multilingual.git](https://github.com/NisargBhavsar25/XTTSv2-Indic-Polyglot.git)
+## Installation
+
+First, clone the repository and install the required dependencies.
+
+```bash
+git clone https://github.com/NisargBhavsar25/XTTSv2-Indic-Polyglot.git
 cd XTTSv2-Indic-Polyglot
-pip install -r requirements.txt --index-url https://download.pytorch.org/whl/cu118
+pip install -r requirements.txt
 ```
 
-## 2. Data Preparation
 
-Ensure your data is organized as follows:
+## Training Process
 
-```
-project_root/
-├── datasets/
-│   ├── wavs/
-│   │   ├── xxx.wav
-│   │   ├── yyy.wav
-│   │   ├── zzz.wav
-│   │   └── ...
-│   ├── metadata.csv
-...
-│   
-├── recipes/
-├── scripts/
-├── TTS/
-└── README.md
+The training is a four-step process that involves setting up the pre-trained model and dataset, preparing the vocabulary, and fine-tuning the GPT model on the Indic languages.
+
+### Step 1: Download Pre-trained Checkpoints
+
+Download the official XTTSv2 pre-trained model checkpoints. These will serve as the base for fine-tuning. The checkpoints will be saved in a `checkpoints/` directory[^1].
+
+```bash
+python -m scripts.preparation.download_checkpoint --output_path checkpoints/
 ```
 
-Format your `metadata.csv` file as follows:
+
+### Step 2: Download IndicTTS Dataset
+
+Download the IndicTTS dataset, which contains audio and corresponding text for multiple Indic languages. This script will create a directory named `IndicTTS-datasets/` containing the `metadata.csv` file and audio clips[^1].
+
+```bash
+python -m scripts.preparation.download_IndicTTS_dataset
+```
+
+
+### Step 3: Extend Vocabulary for Each Language
+
+For each language you intend to train, you must extend the model's vocabulary and adjust its configuration. This process incorporates language-specific characters into the model.
+
+Run the following command for **each language** in your dataset. Replace `$language_code` with the appropriate code (e.g., `hi` for Hindi, `bn` for Bengali).
+
+```bash
+python -m scripts.preparation.extend_vocab_config \
+    --output_path checkpoints/ \
+    --metadata_path IndicTTS-datasets/metadata.csv \
+    --language $language_code \
+    --extended_vocab_size 500
+```
+
+* `--output_path`: Path to the directory containing the downloaded checkpoints.
+* `--metadata_path`: Path to the dataset's metadata file.
+* `--language`: The language code for which to extend the vocabulary.
+* `--extended_vocab_size`: The number of new tokens to add to the vocabulary.
+
+
+### Step 4: Train the GPT Model
+
+Finally, start the GPT model training process using the prepared dataset and extended vocabulary. The script `train_gpt_xtts_balanced_new.py` is designed to handle multilingual training from a single metadata file[^1].
+
+```bash
+CUDA_VISIBLE_DEVICES=0 python -m scripts.training.train_gpt_xtts_balanced_new \
+    --output_path checkpoints/ \
+    --metadatas IndicTTS-datasets/metadata.csv \
+    --num_epochs 9 \
+    --batch_size 8 \
+    --grad_acumm 32 \
+    --max_text_length 400 \
+    --max_audio_length 330750 \
+    --weight_decay 1e-2 \
+    --lr 5e-5 \
+    --save_step 5000
+```
+
+**Key Training Parameters:**
+
+* **`--output_path`**: Directory where the fine-tuned model checkpoints will be saved.
+* **`--metadatas`**: Path to the training metadata CSV file. The script handles multilingual data by reading the language column from this file.
+* **`--num_epochs`**: Total number of training epochs.
+* **`--batch_size`**: Number of samples per batch.
+* **`--grad_acumm`**: Gradient accumulation steps to simulate a larger batch size.
+* **`--lr`**: The learning rate for the optimizer.
+* **`--save_step`**: Checkpoints are saved every specified number of steps.
+
+
+## Using Custom Datasets
+
+While this repository is configured for the IndicTTS dataset, you can train the model on your own custom dataset. To do so, you must format your data correctly.
+
+1. **Organize Audio Files**: Place all your `.wav` audio files in a single directory (e.g., `my_dataset/wavs/`).
+2. **Create `metadata.csv`**: Create a `metadata.csv` file in your dataset's root directory. This file should link the audio files to their transcriptions and specify the language. Use a pipe `|` as the separator.
+
+The `metadata.csv` file must follow this format[^1]:
 
 ```
 audio_file|text|language
-wavs/xxx.wav|How do you do?|@X
-wavs/yyy.wav|Nice to meet you.|@Y
-wavs/zzz.wav|Good to see you.|@Z
+wavs/audio_001.wav|This is the first sentence.|en
+wavs/audio_002.wav|Ceci est la deuxième phrase.|fr
+wavs/audio_003.wav|यह तीसरा वाक्य है।|hi
 ```
 
-## 3. Pretrained Model Download
+* The `audio_file` column should contain the relative path to the audio file from the metadata file's location.
+* The `language` column must contain the language code corresponding to the text.
 
-Execute the following command to download the pretrained model:
-
-```bash
-python download_checkpoint.py --output_path checkpoints/
-```
-
-## 4. Vocabulary Extension and Configuration Adjustment
-
-Extend the vocabulary and adjust the configuration with:
-
-```bash
-python extend_vocab_config.py --output_path=checkpoints/ --metadata_path datasets/metadata_train.csv --language vi --extended_vocab_size 2000
-```
-
-## 5. DVAE Finetuning (Optional)
-
-To finetune the DVAE, run:
-
-```bash
-CUDA_VISIBLE_DEVICES=0 python train_dvae_xtts.py \
---output_path=checkpoints/ \
---train_csv_path=datasets/metadata_train.csv \
---eval_csv_path=datasets/metadata_eval.csv \
---language="vi" \
---num_epochs=5 \
---batch_size=512 \
---lr=5e-6
-```
-
-## 6. GPT Finetuning
-
-For GPT finetuning, execute:
-
-[OUTDATED]
-```bash
-CUDA_VISIBLE_DEVICES=0 python train_gpt_xtts.py \
---output_path=checkpoints/ \
---train_csv_path=datasets/metadata_train.csv \
---eval_csv_path=datasets/metadata_eval.csv \
---language="vi" \
---num_epochs=5 \
---batch_size=8 \
---grad_acumm=2 \
---max_text_length=250 \
---max_audio_length=255995 \
---weight_decay=1e-2 \
---lr=5e-6 \
---save_step=2000
-```
-[UPDATE - Supports training multiple datasets. Format metadatas parameter as follows: `path_to_train_csv_dataset-1,path_to_eval_csv_dataset-1,language_dataset-1 path_to_train_csv_dataset-2,path_to_eval_csv_dataset-2,language_dataset-2 ...`]
-```bash
-CUDA_VISIBLE_DEVICES=0 python train_gpt_xtts.py \
---output_path checkpoints/ \
---metadatas datasets-1/metadata_train.csv,datasets-1/metadata_eval.csv,vi datasets-2/metadata_train.csv,datasets-2/metadata_eval.csv,vi \
---num_epochs 5 \
---batch_size 8 \
---grad_acumm 4 \
---max_text_length 400 \
---max_audio_length 330750 \
---weight_decay 1e-2 \
---lr 5e-6 \
---save_step 50000
-```
-
-## 7. Usage Example
-
-Here's a sample code snippet demonstrating how to use the finetuned model:
-
-```python
-import torch
-import torchaudio
-from tqdm import tqdm
-from underthesea import sent_tokenize
-
-from TTS.tts.configs.xtts_config import XttsConfig
-from TTS.tts.models.xtts import Xtts
-
-# Device configuration
-device = "cuda:0" if torch.cuda.is_available() else "cpu"
-
-# Model paths
-xtts_checkpoint = "checkpoints/GPT_XTTS_FT-August-30-2024_08+19AM-6a6b942/best_model_99875.pth"
-xtts_config = "checkpoints/GPT_XTTS_FT-August-30-2024_08+19AM-6a6b942/config.json"
-xtts_vocab = "checkpoints/XTTS_v2.0_original_model_files/vocab.json"
-
-# Load model
-config = XttsConfig()
-config.load_json(xtts_config)
-XTTS_MODEL = Xtts.init_from_config(config)
-XTTS_MODEL.load_checkpoint(config, checkpoint_path=xtts_checkpoint, vocab_path=xtts_vocab, use_deepspeed=False)
-XTTS_MODEL.to(device)
-
-print("Model loaded successfully!")
-
-# Inference
-tts_text = "Good to see you."
-speaker_audio_file = "ref.wav"
-lang = "vi"
-
-gpt_cond_latent, speaker_embedding = XTTS_MODEL.get_conditioning_latents(
-    audio_path=speaker_audio_file,
-    gpt_cond_len=XTTS_MODEL.config.gpt_cond_len,
-    max_ref_length=XTTS_MODEL.config.max_ref_len,
-    sound_norm_refs=XTTS_MODEL.config.sound_norm_refs,
-)
-
-tts_texts = sent_tokenize(tts_text)
-
-wav_chunks = []
-for text in tqdm(tts_texts):
-    wav_chunk = XTTS_MODEL.inference(
-        text=text,
-        language=lang,
-        gpt_cond_latent=gpt_cond_latent,
-        speaker_embedding=speaker_embedding,
-        temperature=0.1,
-        length_penalty=1.0,
-        repetition_penalty=10.0,
-        top_k=10,
-        top_p=0.3,
-    )
-    wav_chunks.append(torch.tensor(wav_chunk["wav"]))
-
-out_wav = torch.cat(wav_chunks, dim=0).unsqueeze(0).cpu()
-
-# Play audio (for Jupyter Notebook)
-from IPython.display import Audio
-Audio(out_wav, rate=24000)
-```
-
-Note: Finetuning the HiFiGAN decoder was attempted but resulted in worse performance. DVAE and GPT finetuning are sufficient for optimal results.
-
-Update: If you have enough short texts in your datasets (about 20 hours), you do not need to finetune DVAE.
+Once your custom dataset is prepared, you can update the paths in the training commands in [Step 3](#step-3-extend-vocabulary-for-each-language) and [Step 4](#step-4-train-the-gpt-model) to point to your custom `metadata.csv` file.

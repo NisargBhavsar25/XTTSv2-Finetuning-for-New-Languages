@@ -4,16 +4,17 @@ import os
 import soundfile as sf
 import numpy as np
 
+base_dir = 'IndicTTS-datasets'
 languages = ['Hindi', 'Kannada', 'Malayalam', 'Tamil', 'Telugu', 'Bengali', 'Gujarati', 'Marathi']
 for lang in languages:
     dataset = load_dataset(f'SPRINGLab/IndicTTS_{lang}')
     dataset = dataset['train']
 
     # create a directory for all datasets
-    if not os.path.exists('datasets-diff-wavs'):
-        os.makedirs('datasets-diff-wavs')
+    if not os.path.exists(base_dir):
+        os.makedirs(base_dir)
 
-    dataset.save_to_disk(f'datasets-diff-wavs/IndicTTS_{lang}')
+    dataset.save_to_disk(f'{base_dir}/IndicTTS_{lang}')
     print(f'{lang} complete dataset downloaded')
 
 
@@ -22,7 +23,6 @@ for language in languages:
     print(f"Processing dataset for {language}...")
     # Create directories for saving wav files and metadata
     
-    base_dir = 'datasets-diff-wavs'
     wavs_dir = os.path.join(base_dir, 'wavs-hindi')
     os.makedirs(wavs_dir, exist_ok=True)
 
