@@ -1,6 +1,6 @@
 # XTTSv2 Finetuning Guide for New Languages
 
-This guide provides instructions for finetuning XTTSv2 on a new language, using Vietnamese (`vi`) as an example.
+This guide provides instructions for finetuning XTTSv2 on a multiple languages in order to get polyglot characterstics, using indic languages as example.
 
 [UPDATE] A finetuned model for Vietnamese is now available at [anhnh2002/vnTTS](https://huggingface.co/anhnh2002/vnTTS) on Hugging Face
 
@@ -30,22 +30,13 @@ Ensure your data is organized as follows:
 
 ```
 project_root/
-├── datasets-1/
+├── datasets/
 │   ├── wavs/
 │   │   ├── xxx.wav
 │   │   ├── yyy.wav
 │   │   ├── zzz.wav
 │   │   └── ...
-│   ├── metadata_train.csv
-│   ├── metadata_eval.csv
-├── datasets-2/
-│   ├── wavs/
-│   │   ├── xxx.wav
-│   │   ├── yyy.wav
-│   │   ├── zzz.wav
-│   │   └── ...
-│   ├── metadata_train.csv
-│   ├── metadata_eval.csv
+│   ├── metadata.csv
 ...
 │   
 ├── recipes/
@@ -54,10 +45,10 @@ project_root/
 └── README.md
 ```
 
-Format your `metadata_train.csv` and `metadata_eval.csv` files as follows:
+Format your `metadata.csv` file as follows:
 
 ```
-audio_file|text|speaker_name
+audio_file|text|language
 wavs/xxx.wav|How do you do?|@X
 wavs/yyy.wav|Nice to meet you.|@Y
 wavs/zzz.wav|Good to see you.|@Z
