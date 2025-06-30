@@ -26,7 +26,7 @@ pip install -r requirements.txt
 
 ## Training Process
 
-The training is a four-step process that involves setting up the pre-trained model and dataset, preparing the vocabulary, and fine-tuning the GPT model on the Indic languages.
+The training is a four-step process that involves setting up the pre-trained model and dataset, preparing the vocabulary, and fine-tuning the GPT model on the Indic languages. To reproduce our exact reuslts you can directly run the `end_to_end_train.sh` file.
 
 ### Step 1: Download Pre-trained Checkpoints
 
@@ -94,6 +94,15 @@ CUDA_VISIBLE_DEVICES=0 python -m scripts.training.train_gpt_xtts_balanced_new \
 * **`--lr`**: The learning rate for the optimizer.
 * **`--save_step`**: Checkpoints are saved every specified number of steps.
 
+## Inference with Fine-Tuned Model
+
+Once you have a fine-tuned model, you can use the `infer_tuned.py` script to synthesize speech. You will need to provide the paths to your trained model's configuration file and checkpoint, the original vocabulary file, a reference audio for the speaker's voice, the text to synthesize, and the language code.
+
+```bash
+python -m scripts.inference.infer_tuned
+```
+
+Remember to update the checkpoit path in the file before running.
 
 ## Using Custom Datasets
 
@@ -115,3 +124,9 @@ wavs/audio_003.wav|यह तीसरा वाक्य है।|hi
 * The `language` column must contain the language code corresponding to the text.
 
 Once your custom dataset is prepared, you can update the paths in the training commands in [Step 3](#step-3-extend-vocabulary-for-each-language) and [Step 4](#step-4-train-the-gpt-model) to point to your custom `metadata.csv` file.
+
+## Note on Advanced Training (Optional)
+
+This repository includes scripts for fine-tuning other components of the XTTSv2 architecture, such as the D-VAE (`scripts/training/train_dvae_xtts.py`) and the GAN-based vocoder (`scripts/training/train_gan_xtts.py`)[^1].
+
+However, **based on experience, these additional training steps are generally not necessary**. Fine-tuning the GPT model as described in [Step 4](#step-4-train-the-gpt-model) is typically sufficient to achieve high-quality results for new languages. Fine-tuning the D-VAE and GAN may not lead to significant improvements and can sometimes degrade performance[^1].
