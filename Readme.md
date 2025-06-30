@@ -19,8 +19,8 @@ This guide provides instructions for finetuning XTTSv2 on a multiple languages i
 First, clone the repository and install the necessary dependencies:
 
 ```
-git clone https://github.com/dikshitrishii/XTTSv2-Fine-Tuning-Multilingual.git
-cd XTTSv2-Finetuning-for-New-Languages
+git clone [https://github.com/dikshitrishii/XTTSv2-Fine-Tuning-Multilingual.git](https://github.com/NisargBhavsar25/XTTSv2-Indic-Polyglot.git)
+cd XTTSv2-Indic-Polyglot
 pip install -r requirements.txt --index-url https://download.pytorch.org/whl/cu118
 ```
 
