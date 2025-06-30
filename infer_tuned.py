@@ -10,9 +10,9 @@ from TTS.tts.models.xtts import Xtts
 device = "cuda:0" if torch.cuda.is_available() else "cpu"
 timestamp = "May-23-2025_01+20PM-8e59ec3"
 # Model paths
-xtts_checkpoint = f"checkpoints/GPT_XTTS_FT-{timestamp}/checkpoint_5000.pth"
-xtts_config = f"checkpoints/GPT_XTTS_FT-{timestamp}/config.json"
-xtts_vocab = "checkpoints/XTTS_v2.0_original_model_files/vocab.json"
+xtts_checkpoint = f"/home/ubuntu/Dikshit/XTTSv2-Fine-Tuning-Multilingual-combined-tokens/checkpoints/GPT_XTTS_FT_MULTILINGUAL-June-27-2025_10+31AM-d078f73/best_model_47508.pth"
+xtts_config = f"/home/ubuntu/Dikshit/XTTSv2-Fine-Tuning-Multilingual-combined-tokens/checkpoints/GPT_XTTS_FT_MULTILINGUAL-June-27-2025_10+31AM-d078f73/config.json"
+xtts_vocab = "/home/ubuntu/Dikshit/XTTSv2-Fine-Tuning-Multilingual-combined-tokens/checkpoints/XTTS_v2.0_original_model_files/vocab.json"
 
 # Load model
 config = XttsConfig()
@@ -24,8 +24,8 @@ model.to(device)
 print("Model loaded successfully!")
 
 # Get voice conditioning from reference audio
-speaker_audio_file = "reference.wav"
-language = "gj"  # Gujarati language code
+speaker_audio_file = "/home/ubuntu/Dikshit/XTTSv2-Fine-Tuning-Multilingual-combined-tokens/Testing.wav"
+language = "hi"  # Gujarati language code
 
 gpt_cond_latent, speaker_embedding = model.get_conditioning_latents(
     audio_path=speaker_audio_file,
@@ -40,9 +40,13 @@ gpt_cond_latent, speaker_embedding = model.get_conditioning_latents(
 # For longer texts, split into sentences
 # tts_texts = sent_tokenize(tts_text)
 tts_texts = [
-    "પોતાનાં બાળકોને કયા પ્રકારનું શિક્ષણ આપવું તે પસંદ કરવાનો પ્રથમ અધિકાર માબાપોને રહેશે.",
-    "કોમના સાંસ્કૃતિક જીવનમાં છૂટથી ભાગ લેવાનો, કલાઓનો આનંદ માણવાનો અને વૈજ્ઞાનિક પ્રગતિ અને તેના લાભોમાં ભાગીદાર થવાનો દરેક વ્યક્તિને અધિકાર છે.",
-    "માનવવ્યક્તિત્વના સંપૂર્ણ વિકાસ અને માનવહક્કો અને મૂળભૂત સ્વતંત્રતાઓ પ્રત્યેના માનને દઢિભૂત કરવા તરફ શિક્ષણનું લક્ષ રાખવામાં આવશે. બધાં રાષ્ટ્રો, જાતિ અથવા ધાર્મિક સમૂહો વચ્ચે તે સમજ, સહિષ્ણુતા અને મૈત્રી બઢાવશે અને શાંતિની જાળવણી માટેની સંયુકત રાષ્ટ્રોની પ્રવૃત્તિઓને આગળ ધપાવશે."
+    "Finding a house on NoBroker is incredibly easy and convenient because you don't have to pay any brokerage fees, and you can directly connect with property owners, which saves you both time and money while ensuring a transparent and hassle-free house hunting experience."
+    "நோப்ரோக்கர்-ல் வீடு தேடுவது மிகவும் எளிது மற்றும் வசதியானது, ஏனென்றால் இங்கே எந்த புரோக்கரேஜ் கட்டணமும் கொடுக்க வேண்டியதில்லை மற்றும் நீங்கள் நேரடியாக வீட்டின் உரிமையாளருடன் தொடர்பு கொள்ளலாம், இதனால் உங்கள் நேரமும் பணமும் மிச்சமாகிறது." # tamil
+    "NoBroker से house ढूंढना इतना आसान और easy है, because यहाँ आपको कोई ब्रोकरेज फीस नहीं देनी पड़ती और आप सीधे मकान मालिक से बात कर सकते हैं, जिससे आपका समय और पैसा दोनों बचता है।"
+    "നോബ്രോക്കർ-ൽ വീട് കണ്ടെത്തുന്നത് വളരെ എളുപ്പവും സൗകര്യപ്രദവുമാണ്, കാരണം ഇവിടെ ബ്രോക്കറേജ് ഫീസ് ഒന്നും നൽകേണ്ടതില്ല, കൂടാതെ നിങ്ങൾക്ക് നേരിട്ട് വീട്ടുടമയുമായി ബന്ധപ്പെടാൻ കഴിയും, ഇത് നിങ്ങളുടെ സമയവും പണവും ലാഭിക്കാൻ സഹായിക്കുന്നു." # Malayalam
+    "तू मला मदत करशील का?"  # Marathi
+    "ನೋಬ್ರೋಕರ್ ನಲ್ಲಿ ಮನೆ ಹುಡುಕುವುದು ತುಂಬಾ ಸುಲಭ ಮತ್ತು ಅನುಕೂಲಕರವಾಗಿದೆ, ಏಕೆಂದರೆ ಇಲ್ಲಿ ಯಾವುದೇ ಬ್ರೋಕರೇಜ್ ಫೀಸು ನೀಡಬೇಕಾಗಿಲ್ಲ ಮತ್ತು ನೀವು ನೇರವಾಗಿ ಮನೆ ಮಾಲೀಕರೊಂದಿಗೆ ಸಂಪರ್ಕ ಸಾಧಿಸಬಹುದು, ಇದರಿಂದ ನಿಮ್ಮ ಸಮಯ ಮತ್ತು ಹಣ ಎರಡೂ ಉಳಿತಾಯವಾಗುತ್ತದೆ." # Kannada
+    "నోబ్రోకర్ లో ఇల్లు వెతకడం చాలా సులభం మరియు సౌకర్యవంతమైనది, ఎందుకంటే ఇక్కడ ఎలాంటి బ్రోకరేజ్ ఫీసు చెల్లించాల్సిన అవసరం లేదు మరియు మీరు నేరుగా ఇంటి యజమానితో సంప్రదించవచ్చు, దీని వలన మీ సమయం మరియు డబ్బు రెండూ ఆదా అవుతాయి." # Telugu
 ]
 
 # Process each sentence
@@ -65,7 +69,7 @@ for text in tqdm(tts_texts):
 out_wav = torch.cat(wav_chunks, dim=0).unsqueeze(0).cpu()
 
 # Save the audio
-torchaudio.save("output.wav", out_wav, 24000)
+torchaudio.save("output_mixed_sep_token.wav", out_wav, 24000)
 
 # # For Jupyter Notebook, play the audio
 # from IPython.display import Audio
