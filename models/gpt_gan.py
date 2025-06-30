@@ -14,7 +14,7 @@ from TTS.vocoder.layers.losses import DiscriminatorLoss, GeneratorLoss
 from TTS.vocoder.models.base_vocoder import BaseVocoder
 from TTS.vocoder.utils.generic_utils import plot_results
 
-from datasets.dataset_gan import GPTGANDataset
+from datasets_.dataset_gan import GPTGANDataset
 from .hifigan_decoder import HifiganGenerator, ResNetSpeakerEncoder
 from .hifigan_discriminator import HifiganDiscriminator
 
