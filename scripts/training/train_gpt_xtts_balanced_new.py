@@ -136,8 +136,9 @@ def train_gpt(metadatas, num_epochs, batch_size, grad_acumm, output_path, max_au
     # Define here the dataset that you want to use for the fine-tuning
     DATASETS_CONFIG_LIST = []
     for metadata in metadatas:
-        train_csv, language_id = metadata.split(",")
-        print(f"Loading dataset: {train_csv} with identifier: {language_id}")
+        # train_csv, language_id = metadata.split(",")
+        train_csv = metadata
+        # print(f"Loading dataset: {train_csv} with identifier: {language_id}")
 
         config_dataset = BaseDatasetConfig(
             formatter="coqui",
@@ -145,7 +146,7 @@ def train_gpt(metadatas, num_epochs, batch_size, grad_acumm, output_path, max_au
             path=os.path.dirname(train_csv),
             meta_file_train=os.path.basename(train_csv),
             meta_file_val=None,  # No separate eval file
-            language=language_id,  # This is just an identifier, actual languages come from CSV
+            # language=language_id,  # This is just an identifier, actual languages come from CSV
         )
 
         DATASETS_CONFIG_LIST.append(config_dataset)
