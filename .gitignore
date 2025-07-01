@@ -23,3 +23,5 @@ dataset3lang/
 male-female-indictts-data/
 .repomix/
 repomix-output.md
+benchmark/
+batch_inference_output/
