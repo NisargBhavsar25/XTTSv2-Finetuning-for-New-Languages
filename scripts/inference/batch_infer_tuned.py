@@ -26,7 +26,7 @@ from TTS.tts.models.xtts import Xtts
 
 class OptimizedXTTSBatchInference:
     """Optimized XTTS batch inference with dynamic batching and memory management."""
-    
+
     def __init__(self, config_path: str, checkpoint_path: str, vocab_path: str, device: str = "cuda"):
         self.device = device
         self.model = None
@@ -34,16 +34,16 @@ class OptimizedXTTSBatchInference:
         self.gpt_cond_latent = None
         self.speaker_embedding = None
         self.language_mapping = self._create_language_mapping()
-        
+
         # Performance metrics
         self.total_processing_time = 0
         self.total_samples = 0
         self.successful_count = 0
         self.failed_count = 0
-        
+
         # Load model
         self._load_model(config_path, checkpoint_path, vocab_path)
-    
+
     def _create_language_mapping(self) -> Dict[str, str]:
         """Create mapping from full language names to language codes."""
         return {
@@ -57,18 +57,18 @@ class OptimizedXTTSBatchInference:
             "Gujarati": "gu",
             "English": "en"
         }
-    
+
     def _load_model(self, config_path: str, checkpoint_path: str, vocab_path: str):
         """Load the tuned XTTS model with optimization."""
         print("Loading model...")
-        
+
         # Load config
         self.config = XttsConfig()
         self.config.load_json(config_path)
-        
+
         # Initialize model
         self.model = Xtts.init_from_config(self.config)
-        
+
         # Load checkpoint
         self.model.load_checkpoint(
             self.config, 
@@ -76,10 +76,10 @@ class OptimizedXTTSBatchInference:
             vocab_path=vocab_path, 
             use_deepspeed=False
         )
-        
+
         self.model.to(self.device)
         self.model.eval()
-        
+
         # Optimize for inference
         if hasattr(torch, 'jit') and self.device == "cuda":
             try:
@@ -88,13 +88,13 @@ class OptimizedXTTSBatchInference:
                 torch.backends.cudnn.deterministic = False
             except Exception as e:
                 print(f"Warning: Could not enable CUDA optimizations: {e}")
-        
+
         print("Model loaded successfully!")
-    
+
     def _optimize_speaker_conditioning(self, speaker_wav_path: str):
         """Optimize speaker conditioning with proper memory management."""
         print("Computing speaker conditioning latents...")
-        
+
         with torch.no_grad():
             self.gpt_cond_latent, self.speaker_embedding = self.model.get_conditioning_latents(
                 audio_path=speaker_wav_path,
@@ -102,7 +102,7 @@ class OptimizedXTTSBatchInference:
                 max_ref_length=self.config.max_ref_len,
                 sound_norm_refs=self.config.sound_norm_refs,
             )
-            
+
             # Optimize memory usage based on device
             if self.device == "cuda":
                 # Tensors are already on GPU, just ensure they're contiguous for efficiency
@@ -116,9 +116,9 @@ class OptimizedXTTSBatchInference:
                 except RuntimeError:
                     # If pinning fails, just use tensors as-is
                     pass
-        
+
         print("Speaker conditioning computed successfully!")
-    
+
     @contextmanager
     def _timing_context(self, description: str):
         """Context manager for timing operations."""
@@ -128,37 +128,39 @@ class OptimizedXTTSBatchInference:
         elapsed = end_time - start_time
         print(f"{description}: {elapsed:.2f} seconds")
         self.total_processing_time += elapsed
-    
+
     def _clear_gpu_memory(self):
         """Clear GPU memory cache."""
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
             gc.collect()
-    
+
     def _group_by_language(self, df: pd.DataFrame) -> Dict[str, List[Tuple[int, str, str]]]:
         """Group sentences by language for efficient processing."""
         language_groups = defaultdict(list)
-        
+
         for idx, row in df.iterrows():
             language_full = row["language"].strip()
             text = row["generated_sentence"].strip()
             sentence_id = str(row["sentence_id"]).strip()
-            
+
             # Validate language
             if language_full not in self.language_mapping:
                 print(f"Warning: Unknown language '{language_full}' for sentence {sentence_id}. Skipping.")
                 continue
-                
+
             # Skip empty text
             if not text:
                 print(f"Warning: Empty text for sentence {sentence_id}. Skipping.")
                 continue
-            
+
             language_code = self.language_mapping[language_full]
+            # language_code = language_full
+
             language_groups[language_code].append((idx, text, sentence_id))
-        
+
         return language_groups
-    
+
     def _single_inference(
         self, 
         text: str, 
@@ -179,7 +181,7 @@ class OptimizedXTTSBatchInference:
         except Exception as e:
             print(f"Error in single inference for text '{text[:50]}...': {str(e)}")
             return None
-    
+
     def _save_audio_with_retry(self, audio_tensor: torch.Tensor, output_path: Path, max_retries: int = 3):
         """Save audio with retry logic."""
         for attempt in range(max_retries):
@@ -196,7 +198,7 @@ class OptimizedXTTSBatchInference:
                     return False
                 time.sleep(0.1)  # Brief pause before retry
         return False
-    
+
     def process_language_group(
         self, 
         language_code: str, 
@@ -208,17 +210,17 @@ class OptimizedXTTSBatchInference:
         """Process a group of items with the same language."""
         successful = 0
         failed = 0
-        
+
         # Create language-specific subfolder
         language_output_folder = output_folder / language_code
         language_output_folder.mkdir(parents=True, exist_ok=True)
         print(f"Created language folder: {language_output_folder}")
-        
+
         with self._timing_context(f"Processing {len(items)} items in {language_code}"):
             # Process items individually for better error handling
             for idx, text, sentence_id in tqdm(items, desc=f"Processing {language_code}"):
                 audio_tensor = self._single_inference(text, language_code, **generation_params)
-                
+
                 if audio_tensor is not None:
                     # Save in language-specific subfolder
                     output_path = language_output_folder / f"{sentence_id}.wav"
@@ -228,13 +230,13 @@ class OptimizedXTTSBatchInference:
                         failed += 1
                 else:
                     failed += 1
-                
+
                 # Periodic memory cleanup
                 if (successful + failed) % 10 == 0:
                     self._clear_gpu_memory()
-        
+
         return successful, failed
-    
+
     def process_csv_batch(
         self,
         csv_path: str,
@@ -250,38 +252,38 @@ class OptimizedXTTSBatchInference:
         top_p: float = 0.85
     ):
         """Process a CSV file for optimized batch inference."""
-        
+
         # Read and validate CSV
-        df = pd.read_csv(csv_path)
+        df = pd.read_csv(csv_path, delimiter=',', encoding='utf-8')
         print(f"Processing {len(df)} samples from {csv_path}")
-        
+
         # Validate CSV columns
         required_columns = ["language", "generated_sentence", "sentence_id"]
         missing_columns = [col for col in required_columns if col not in df.columns]
         if missing_columns:
             raise ValueError(f"Missing required columns: {missing_columns}")
-        
+
         # Create output directory
         csv_name = Path(csv_path).stem
         output_folder = Path(output_dir) / csv_name
         output_folder.mkdir(parents=True, exist_ok=True)
         print(f"Output will be saved to: {output_folder}")
         print("Language-specific subfolders will be created automatically.")
-        
+
         # Optimize speaker conditioning
         self._optimize_speaker_conditioning(speaker_wav_path)
-        
+
         # Clear GPU memory before processing
         self._clear_gpu_memory()
-        
+
         # Group by language for efficient processing
         with self._timing_context("Grouping sentences by language"):
             language_groups = self._group_by_language(df)
-        
+
         print(f"Found {len(language_groups)} languages: {list(language_groups.keys())}")
         for lang, items in language_groups.items():
             print(f"  {lang}: {len(items)} sentences")
-        
+
         # Generation parameters
         generation_params = {
             "temperature": temperature,
@@ -290,15 +292,15 @@ class OptimizedXTTSBatchInference:
             "top_k": top_k,
             "top_p": top_p
         }
-        
+
         # Process batches
         start_time = time.time()
-        
+
         # Sequential processing (more stable)
         print("Using sequential processing...")
         successful_count = 0
         failed_count = 0
-        
+
         for language_code, items in language_groups.items():
             lang_successful, lang_failed = self.process_language_group(
                 language_code, 
@@ -309,15 +311,15 @@ class OptimizedXTTSBatchInference:
             )
             successful_count += lang_successful
             failed_count += lang_failed
-        
+
         # Final cleanup
         self._clear_gpu_memory()
-        
+
         # Calculate and display performance metrics
         end_time = time.time()
         total_time = end_time - start_time
         total_samples = successful_count + failed_count
-        
+
         print(f"\n{'='*50}")
         print("BATCH PROCESSING COMPLETED!")
         print(f"{'='*50}")
@@ -327,11 +329,11 @@ class OptimizedXTTSBatchInference:
         if total_samples > 0:
             print(f"Success rate: {(successful_count/total_samples)*100:.1f}%")
         print(f"Total processing time: {total_time:.2f} seconds")
-        
+
         if successful_count > 0:
             print(f"Average time per sample: {total_time/total_samples:.2f} seconds")
             print(f"Throughput: {successful_count/total_time:.2f} samples/second")
-        
+
         print(f"\nOutput structure:")
         print(f"├── {output_folder}")
         for lang_code in language_groups.keys():
@@ -339,7 +341,7 @@ class OptimizedXTTSBatchInference:
             if lang_folder.exists():
                 wav_files = list(lang_folder.glob("*.wav"))
                 print(f"│   ├── {lang_code}/ ({len(wav_files)} files)")
-        
+
         print(f"{'='*50}")
 
 
@@ -425,9 +427,9 @@ def main():
         default=0.3,
         help="Top-p (nucleus) sampling parameter"
     )
-    
+
     args = parser.parse_args()
-    
+
     # Validate input files
     required_files = [
         (args.csv_path, "CSV file"),
@@ -436,16 +438,16 @@ def main():
         (args.vocab_path, "Vocab file"),
         (args.speaker_wav, "Speaker audio file")
     ]
-    
+
     for file_path, file_type in required_files:
         if not os.path.exists(file_path):
             raise FileNotFoundError(f"{file_type} not found: {file_path}")
-    
+
     # Set device
     device = args.device if torch.cuda.is_available() or args.device == "cpu" else "cpu"
     if device != args.device:
         print(f"Warning: Requested device '{args.device}' not available. Using '{device}' instead.")
-    
+
     # Initialize inference system
     inference_system = OptimizedXTTSBatchInference(
         args.config_path,
@@ -453,7 +455,7 @@ def main():
         args.vocab_path,
         device
     )
-    
+
     # Process batch
     inference_system.process_csv_batch(
         csv_path=args.csv_path,
@@ -474,10 +476,10 @@ if __name__ == "__main__":
 
 # Example usage:
 # python -m scripts.inference.batch_infer_tuned \
-#     --csv_path "benchmark/koel-g.csv" \
+#     --csv_path "benchmark/transliterated_mixed_code.csv" \
 #     --config_path "checkpoints/GPT_XTTS_FT_MULTILINGUAL-June-27-2025_10+31AM-d078f73/config.json" \
 #     --checkpoint_path "checkpoints/GPT_XTTS_FT_MULTILINGUAL-June-27-2025_10+31AM-d078f73/best_model.pth" \
 #     --vocab_path "checkpoints/XTTS_v2.0_original_model_files/vocab.json" \
-#     --speaker_wav "MoMo-Ref.wav" \
+#     --speaker_wav "palki-ref.wav" \
 #     --output_dir "./batch_inference_output" \
 #     --batch_size 4 \

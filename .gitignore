@@ -25,3 +25,5 @@ male-female-indictts-data/
 repomix-output.md
 benchmark/
 batch_inference_output/
+
+benchmark_creation.py
