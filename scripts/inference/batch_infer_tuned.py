@@ -254,7 +254,8 @@ class OptimizedXTTSBatchInference:
         """Process a CSV file for optimized batch inference."""
 
         # Read and validate CSV
-        df = pd.read_csv(csv_path, delimiter=',', encoding='utf-8')
+        df = pd.read_csv(csv_path, delimiter='|', encoding='utf-8')
+        df['generated_sentence'] = df['generated_sentence'].astype(str).str.strip()
         print(f"Processing {len(df)} samples from {csv_path}")
 
         # Validate CSV columns
@@ -476,10 +477,10 @@ if __name__ == "__main__":
 
 # Example usage:
 # python -m scripts.inference.batch_infer_tuned \
-#     --csv_path "benchmark/transliterated_mixed_code.csv" \
-#     --config_path "checkpoints/GPT_XTTS_FT_MULTILINGUAL-June-27-2025_10+31AM-d078f73/config.json" \
-#     --checkpoint_path "checkpoints/GPT_XTTS_FT_MULTILINGUAL-June-27-2025_10+31AM-d078f73/best_model.pth" \
-#     --vocab_path "checkpoints/XTTS_v2.0_original_model_files/vocab.json" \
-#     --speaker_wav "palki-ref.wav" \
-#     --output_dir "./batch_inference_output" \
-#     --batch_size 4 \
+#     --csv_path "/home/ubuntu/Dikshit/XTTSv2-Indic-Polyglot/LJSpeech/processed_metadata.csv" \
+#     --config_path "/home/ubuntu/Dikshit/XTTSv2-Indic-Polyglot/checkpoints/XTTS_v2.0_original_model_files/config.json" \
+#     --checkpoint_path "/home/ubuntu/Dikshit/XTTSv2-Indic-Polyglot/checkpoints/XTTS_v2.0_original_model_files/model.pth" \
+#     --vocab_path "/home/ubuntu/Dikshit/XTTSv2-Indic-Polyglot/checkpoints/XTTS_v2.0_original_model_files/vocab.json" \
+#     --speaker_wav "/home/ubuntu/Dikshit/XTTSv2-Indic-Polyglot/whisper_audio.wav" \
+#     --output_dir "./whisper_audio_outputs" \
+#     --batch_size 8 \

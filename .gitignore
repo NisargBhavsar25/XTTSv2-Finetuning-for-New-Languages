@@ -25,5 +25,7 @@ male-female-indictts-data/
 repomix-output.md
 benchmark/
 batch_inference_output/
-
+whisper_audio_outputs
 benchmark_creation.py
+ref_def.wav
+whisper_audio.wav
